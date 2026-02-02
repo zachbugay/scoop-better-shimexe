@@ -42,7 +42,7 @@ if (-not [bool](Get-Command zig -ErrorAction SilentlyContinue)) {
 Remove-Item -Path "$PSScriptRoot\zig-out" -Recurse -Force -ErrorAction SilentlyContinue
 
 Push-Location $PSScriptRoot
-# Create a targets (hashtable)
+
 $targets = @{
     'x86-windows-gnu'      = 'shim-ia32.exe'
     'x86-windows-msvc'     = 'shim-ia32-msvc.exe'
@@ -54,8 +54,8 @@ $targets = @{
 
 if ($Target)
 {
-    Write-Host "Build shim.exe for $($Target)..." -ForegroundColor Cyan
-    Start-Process -FilePath "zig" -ArgumentList "build -Dtarget=$Target -Doptimize=$BuildMode" -Wait -NoNewWindow
+    Write-Host "Build shim.exe for $($Target) with optimize $($BuildMode)..." -ForegroundColor Cyan
+    Start-Process -FilePath "zig" -ArgumentList "build -Dtarget=$($Target) -Doptimize=$($BuildMode)" -Wait -NoNewWindow
     Rename-Item -Path "$PSScriptRoot\zig-out\bin\shim.exe" -NewName "$PSScriptRoot\zig-out\bin\$($targets[$Target])"
 }
 
@@ -66,7 +66,7 @@ if ($Zip) {
         $sha256 = (Get-FileHash "$PSScriptRoot\zig-out\bin\$($targets[$Target])" -Algorithm SHA256).Hash.ToLower()
         "$sha256 $($targets[$Target])" | Out-File "$PSScriptRoot\zig-out\bin\$($targets[$Target]).sha256"
         $sha512 = (Get-FileHash "$PSScriptRoot\zig-out\bin\$($targets[$Target])" -Algorithm SHA512).Hash.ToLower()
-        "$sha512  $($targets[$Target])" | Out-File "$PSScriptRoot\zig-out\bin\$($targets[$Target])"
+        "$sha512  $($targets[$Target])" | Out-File "$PSScriptRoot\zig-out\bin\$($targets[$Target]).sha512"
     }
 
     Write-Host "Packaging..." -ForegroundColor Cyan
